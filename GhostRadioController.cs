@@ -70,7 +70,7 @@ public class GhostRadioController
                         // Found a station
                         if (_currentStationUrl != stationUrl)
                         {
-                            Console.WriteLine($"Tuning to station: {stationUrl} (tuner: {tunerValue:F1})");
+                            Console.WriteLine($"\nTuning to station: {stationUrl}");
                             _audioPlayer.PlayStation(stationUrl);
                             _currentStationUrl = stationUrl;
                         }
@@ -80,7 +80,7 @@ public class GhostRadioController
                         // No station found, play static
                         if (_currentStationUrl != _staticFile)
                         {
-                            Console.WriteLine($"Playing static (tuner: {tunerValue:F1})");
+                            Console.WriteLine($"\nNo station matched. Playing static.");
                             _audioPlayer.PlayStaticFile(_staticFile);
                             _currentStationUrl = _staticFile;
                         }
@@ -91,7 +91,7 @@ public class GhostRadioController
                     {
                         var station = _stationService.GetStation(tunerValue);
                         var stationInfo = station != null ? $"Station: {station.Url}" : "Static";
-                        Console.WriteLine($"Tuner: {tunerValue:F1}, Volume: {volumeValue:F1}, {stationInfo}");
+                        Console.Write($"\rPower: {_powerState}  Tuner: {tunerValue:6.1f}  Volume: {volumeValue:6.1f}  {stationInfo}");
                     }
                 }
 
@@ -99,6 +99,7 @@ public class GhostRadioController
             }
             catch (OperationCanceledException)
             {
+                Console.WriteLine(); // New line before exit
                 break;
             }
             catch (Exception ex)
