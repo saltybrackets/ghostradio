@@ -20,7 +20,7 @@ public static class Program
         using HardwareInterface hardware = new HardwareInterface();
         using AudioPlayer audioPlayer = new AudioPlayer();
         RadioStationMap radioStations = RadioStationMap.Load("stations.json");
-        GhostRadioController ghostRadio = new GhostRadioController(
+        GhostRadio ghostRadio = new GhostRadio(
             hardware: hardware, 
             audioPlayer: audioPlayer, 
             radioStations: radioStations, 

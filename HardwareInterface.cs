@@ -49,16 +49,65 @@ public class HardwareInterface : IDisposable
         _spiDevice = null!;
     }
 
+    /// <summary>
+    /// Return that state of the power switch.
+    /// </summary>
+    /// <returns>True if on, false if off.</returns>
     public bool ReadPowerSwitch()
     {
         return _gpio.Read(PowerSwitchPin) == PinValue.Low; // Active low with pull-up
     }
 
+    /// <summary>
+    /// Read the value of an analog signal as a percentae between its min and max values.
+    /// </summary>
+    /// <param name="channel">MCP3008 channel to read signal from.</param>
+    /// <returns>Signal value as a percentage.</returns>
     public double ReadAnalogPercentage(int channel)
     {
         int rawValue = ReadMcp3008Channel(channel);
-        
         return (rawValue / 1023.0) * 100.0;
+    }
+    
+    /// <summary>
+    /// Get the current value of the volume signal as a percentage between its min and max values.
+    /// "Normalizes" this value to represent more closely what the human ear would expect.
+    /// </summary>
+    /// <returns>Volume value as a percentage.</returns>
+    public double ReadVolumePercentage()
+    {
+        int rawValue = ReadMcp3008Channel(VolumeChannel);
+        double normalizedValue = rawValue / 1023.0;
+        double linearVolume = normalizedValue * 100.0;
+
+        if (linearVolume >= 90.0)
+        {
+            return linearVolume;
+        }
+        
+        double scaled = Math.Pow(linearVolume / 90.0, 0.15) * 90.0;
+        return scaled < 30 ? 0.0 : scaled;
+    }
+
+    /// <summary>
+    /// Get the current value of the tuner signal as a percentage between its min and max values.
+    /// </summary>
+    /// <returns>Tuner value as a percentage.</returns>
+    public double ReadTunerPercentage()
+    {
+        // Note: This is inverted because the tuner had to be installed upside down.
+        return 100.0 - ReadAnalogPercentage(TunerChannel);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) 
+            return;
+        
+        _gpio?.Dispose();
+        _spiDevice?.Dispose();
+        _adc?.Dispose();
+        _disposed = true;
     }
     
     private int ReadMcp3008Channel(int channel)
@@ -96,46 +145,6 @@ public class HardwareInterface : IDisposable
         
         _gpio.Write(SpiChipSelectPin, PinValue.High); // End transaction
         
-        // Software SPI communication complete
-        
         return result;
-    }
-
-    public double ReadInvertedAnalogPercentage(int channel)
-    {
-        return 100.0 - ReadAnalogPercentage(channel);
-    }
-
-    public double ReadVolumePercentage()
-    {
-        int rawValue = ReadMcp3008Channel(VolumeChannel);
-        double normalizedValue = rawValue / 1023.0;
-        double linearVolume = normalizedValue * 100.0;
-
-        if (linearVolume >= 90.0)
-        {
-            return linearVolume;
-        }
-        else
-        {
-            double scaled = Math.Pow(linearVolume / 90.0, 0.15) * 90.0;
-            return scaled < 30 ? 0.0 : scaled;
-        }
-    }
-
-    public double ReadTunerPercentage()
-    {
-        return ReadInvertedAnalogPercentage(TunerChannel);
-    }
-
-    public void Dispose()
-    {
-        if (!_disposed)
-        {
-            _gpio?.Dispose();
-            _spiDevice?.Dispose();
-            _adc?.Dispose();
-            _disposed = true;
-        }
     }
 }

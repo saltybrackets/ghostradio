@@ -1,6 +1,6 @@
 namespace GhostRadio;
 
-public class GhostRadioController(
+public class GhostRadio(
     HardwareInterface hardware,
     AudioPlayer audioPlayer,
     RadioStationMap radioStations,
