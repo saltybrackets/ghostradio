@@ -44,6 +44,7 @@ public class HardwareInterface : IDisposable
     public double ReadAnalogPercentage(int channel)
     {
         var rawValue = _adc.Read(channel);
+        Console.WriteLine($"DEBUG: Channel {channel} raw value: {rawValue}");
         return (rawValue / 1023.0) * 100.0;
     }
 
@@ -54,8 +55,10 @@ public class HardwareInterface : IDisposable
 
     public double ReadVolumePercentage()
     {
-        var rawValue = _adc.Read(VolumeChannel) / 1023.0;
-        var linearVolume = rawValue * 100.0;
+        var rawValue = _adc.Read(VolumeChannel);
+        Console.WriteLine($"DEBUG: Volume channel raw value: {rawValue}");
+        var normalizedValue = rawValue / 1023.0;
+        var linearVolume = normalizedValue * 100.0;
 
         if (linearVolume >= 90.0)
         {
