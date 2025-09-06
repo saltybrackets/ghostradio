@@ -1,0 +1,54 @@
+{
+  "stations": [
+    {
+      "min": 34.8,
+      "max": 41.2,
+      "url": "https://relay.rainwave.cc/game.mp3"
+    },
+    {
+      "min": 57.2,
+      "max": 64.2,
+      "url": "https://relay.rainwave.cc/ocremix.mp3"
+    },
+    {
+      "min": 82.8,
+      "max": 85.7,
+      "url": "https://relay.rainwave.cc/chiptune.mp3"
+    },
+    {
+      "min": 86.5,
+      "max": 88.0,
+      "url": "https://ice5.somafm.com/groovesalad-128-mp3"
+    },
+    {
+      "min": 88.6,
+      "max": 90.0,
+      "url": "https://ice6.somafm.com/missioncontrol-128-mp3"
+    },
+    {
+      "min": 90.3,
+      "max": 91.5,
+      "url": "https://ice4.somafm.com/synphaera-128-mp3"
+    },
+    {
+      "min": 91.8,
+      "max": 93.1,
+      "url": "https://ice4.somafm.com/darkzone-128-mp3"
+    },
+    {
+      "min": 93.9,
+      "max": 95.1,
+      "url": "https://ice2.somafm.com/n5md-128-mp3"
+    },
+    {
+      "min": 96.2,
+      "max": 97.3,
+      "url": "https://chillstep.info/radio/stream.ogg?1746034592862"
+    },
+    {
+      "min": 98.9,
+      "max": 100.0,
+      "url": "https://ec3.yesstreaming.net:3545"
+    }
+  ]
+}
