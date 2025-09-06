@@ -91,7 +91,7 @@ public class GhostRadioController
                     {
                         var station = _stationService.GetStation(tunerValue);
                         var stationInfo = station != null ? $"Station: {station.Url}" : "Static";
-                        Console.Write($"\rPower: {_powerState}  Tuner: {tunerValue:6.1f}  Volume: {volumeValue:6.1f}  {stationInfo}");
+                        Console.Write($"\rPower: {_powerState}  Tuner: {tunerValue:F1}  Volume: {volumeValue:F1}  {stationInfo}");
                     }
                 }
 
