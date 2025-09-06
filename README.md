@@ -1,6 +1,5 @@
 # GhostRadio Project
 
-[![Build and Release](https://github.com/saltybrackets/ghostradio/actions/workflows/build-release.yml/badge.svg)](https://github.com/saltybrackets/ghostradio/actions/workflows/build-release.yml)
 When I was a kid, I was often working with my dad out in the garage, or his shop, or outside. No matter where we were, however, he always kept an old portable transistor radio on him. I didn't love the work, or his choice in music (oldies), but I do maintain a sort of nostalgia for those simpler times.
 
 I also miss the feeling of trying to track down music in a sea of static. Particularly in AM frequencies, there was no telling what you might find. Especially late at night, when you might chance upon some garbled voice you couldn't quite make out... it was eerie, creepy. Was that a ghost in the radio, trying to make contact across the airwaves?
