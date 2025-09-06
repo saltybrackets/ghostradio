@@ -14,6 +14,12 @@ public class HardwareInterface : IDisposable
     // GPIO pins
     private const int PowerSwitchPin = 17;
     
+    // Software SPI pins (standard SPI0 pins)
+    private const int SpiClockPin = 11;   // SCLK
+    private const int SpiMosiPin = 10;    // MOSI  
+    private const int SpiMisoPin = 9;     // MISO
+    private const int SpiChipSelectPin = 8; // CE0
+    
     // MCP3008 channels
     private const int TunerChannel = 0;
     private const int VolumeChannel = 1;
@@ -25,21 +31,22 @@ public class HardwareInterface : IDisposable
         // Initialize power switch pin
         _gpio.OpenPin(PowerSwitchPin, PinMode.InputPullUp);
         
-        // Back to spidev0.1 since 0.0 doesn't exist
-        var spiSettings = new SpiConnectionSettings(0, 1)
-        {
-            ClockFrequency = 500000, // Slower clock - try 500kHz
-            Mode = SpiMode.Mode0,
-            DataBitLength = 8,
-            ChipSelectLineActiveState = PinValue.Low
-        };
+        // Initialize software SPI pins
+        _gpio.OpenPin(SpiClockPin, PinMode.Output);
+        _gpio.OpenPin(SpiMosiPin, PinMode.Output);
+        _gpio.OpenPin(SpiMisoPin, PinMode.Input);
+        _gpio.OpenPin(SpiChipSelectPin, PinMode.Output);
         
-        _spiDevice = SpiDevice.Create(spiSettings);
-        Console.WriteLine($"DEBUG: SPI device created: {_spiDevice != null}");
+        // Set initial states
+        _gpio.Write(SpiClockPin, PinValue.Low);
+        _gpio.Write(SpiMosiPin, PinValue.Low);
+        _gpio.Write(SpiChipSelectPin, PinValue.High); // Chip select is active low
         
-        // Initialize MCP3008
-        _adc = new Mcp3008(_spiDevice);
-        Console.WriteLine($"DEBUG: MCP3008 initialized");
+        Console.WriteLine($"DEBUG: Software SPI initialized");
+        
+        // Note: _adc and _spiDevice are not used in software SPI mode
+        _adc = null!;
+        _spiDevice = null!;
     }
 
     public bool ReadPowerSwitch()
@@ -58,24 +65,44 @@ public class HardwareInterface : IDisposable
     
     private int ReadMcp3008Channel(int channel)
     {
-        // MCP3008 SPI protocol: send 3 bytes, get 3 bytes back
-        // Start bit (1) + SGL/DIFF (1 for single-ended) + D2 D1 D0 (channel) + don't care bits
-        var command = new byte[3];
-        command[0] = 0x01; // Start bit
-        command[1] = (byte)(0x80 | (channel << 4)); // Single-ended + channel
-        command[2] = 0x00; // Don't care
+        // Software SPI implementation matching gpiozero behavior
+        _gpio.Write(SpiChipSelectPin, PinValue.Low); // Start transaction
         
-        var response = new byte[3];
-        _spiDevice.TransferFullDuplex(command, response);
+        // Send command: start bit + single-ended + channel
+        var command = 0x18 | channel; // 11000 + 3-bit channel (0x18 = 24 = 11000 binary)
         
-        // Debug: log the actual SPI transaction
-        if (channel == 0) // Only log channel 0 to avoid spam
+        var result = 0;
+        
+        // Send 5 command bits
+        for (int i = 4; i >= 0; i--)
         {
-            Console.WriteLine($"DEBUG SPI: Sent [{command[0]:X2} {command[1]:X2} {command[2]:X2}] -> Got [{response[0]:X2} {response[1]:X2} {response[2]:X2}]");
+            _gpio.Write(SpiMosiPin, (command & (1 << i)) != 0 ? PinValue.High : PinValue.Low);
+            _gpio.Write(SpiClockPin, PinValue.High);
+            Thread.Sleep(1); // Small delay for signal stability
+            _gpio.Write(SpiClockPin, PinValue.Low);
+            Thread.Sleep(1);
         }
         
-        // Extract 10-bit result from response[1] and response[2]
-        var result = ((response[1] & 0x03) << 8) | response[2];
+        // Read 12 result bits (ignore first null bit, then 10 data bits + 1 extra)
+        for (int i = 11; i >= 0; i--)
+        {
+            _gpio.Write(SpiClockPin, PinValue.High);
+            Thread.Sleep(1);
+            if (i < 10 && _gpio.Read(SpiMisoPin) == PinValue.High) // Only read data bits 9-0
+            {
+                result |= 1 << i;
+            }
+            _gpio.Write(SpiClockPin, PinValue.Low);
+            Thread.Sleep(1);
+        }
+        
+        _gpio.Write(SpiChipSelectPin, PinValue.High); // End transaction
+        
+        if (channel == 0) // Debug logging for channel 0
+        {
+            Console.WriteLine($"DEBUG Software SPI: Channel {channel} -> {result}");
+        }
+        
         return result;
     }
 
