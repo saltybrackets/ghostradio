@@ -25,12 +25,13 @@ public class HardwareInterface : IDisposable
         // Initialize power switch pin
         _gpio.OpenPin(PowerSwitchPin, PinMode.InputPullUp);
         
-        // Initialize SPI for MCP3008 with slower clock
-        var spiSettings = new SpiConnectionSettings(0, 1)
+        // Try SPI device 0.0 instead of 0.1 - maybe hardware uses different CS
+        var spiSettings = new SpiConnectionSettings(0, 0)
         {
             ClockFrequency = 500000, // Slower clock - try 500kHz
             Mode = SpiMode.Mode0,
-            DataBitLength = 8
+            DataBitLength = 8,
+            ChipSelectLineActiveState = PinValue.Low
         };
         
         _spiDevice = SpiDevice.Create(spiSettings);
