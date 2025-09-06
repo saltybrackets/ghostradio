@@ -40,7 +40,7 @@ public class AudioPlayer : IDisposable
     /// Stream audio from a given URL.
     /// </summary>
     /// <param name="audioUrl">URL of audio to stream.</param>
-    public void PlayStreamingAudio(string audioUrl)
+    public void PlayStreamingAudio(string? audioUrl)
     {
         if (_currentAudioSourceSource == audioUrl && _mediaPlayer.IsPlaying)
         {
@@ -58,7 +58,7 @@ public class AudioPlayer : IDisposable
     /// Play audio from a local file source.
     /// </summary>
     /// <param name="filePath">Path to a local file to play.</param>
-    public void PlayLocalAudio(string filePath)
+    public void PlayLocalAudio(string? filePath)
     {
         if (!File.Exists(filePath))
         {

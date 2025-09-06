@@ -4,11 +4,11 @@ public class GhostRadioController(
     HardwareInterface hardware,
     AudioPlayer audioPlayer,
     RadioStationMap radioStations,
-    string staticFile,
+    string staticFilePath,
     int updateIntervalMs)
 {
     private bool _powerState = false;
-    private string _currentStationUrl = null;
+    private string? _currentStationUrl = null;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
@@ -44,7 +44,7 @@ public class GhostRadioController(
                     audioPlayer.SetVolume(volumeValue);
 
                     // Handle station tuning
-                    string stationUrl = radioStations.GetStationUrl(tunerValue);
+                    string? stationUrl = radioStations.GetStationUrl(tunerValue);
                     
                     if (!string.IsNullOrEmpty(stationUrl))
                     {
@@ -59,11 +59,11 @@ public class GhostRadioController(
                     else
                     {
                         // No station found, play static
-                        if (_currentStationUrl != staticFile)
+                        if (_currentStationUrl != staticFilePath)
                         {
                             Console.WriteLine($"\nNo station matched. Playing static.");
-                            audioPlayer.PlayLocalAudio(staticFile);
-                            _currentStationUrl = staticFile;
+                            audioPlayer.PlayLocalAudio(staticFilePath);
+                            _currentStationUrl = staticFilePath;
                         }
                     }
 

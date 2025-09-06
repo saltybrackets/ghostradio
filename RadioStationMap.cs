@@ -6,7 +6,7 @@ namespace GhostRadio;
 public class RadioStationMap
 {
     [JsonPropertyName("stations")]
-    private List<RadioStation> _stations { get; set; } = new();
+    public List<RadioStation> Stations { get; } = [];
     
     /// <summary>
     /// Return the URL mapped to a given tuner value.
@@ -15,7 +15,7 @@ public class RadioStationMap
     /// <returns>URL if tuner value maps to a station, or empty if nothing is mapped.</returns>
     public string GetStationUrl(double tunerValue)
     {
-        foreach (RadioStation station in _stations)
+        foreach (RadioStation station in Stations)
         {
             if (tunerValue >= station.MinTunerValue
                 && tunerValue <= station.MaxTunerValue)
@@ -29,13 +29,18 @@ public class RadioStationMap
     
     public RadioStation? GetStation(double tunerValue)
     {
-        return _stations.FirstOrDefault(radioStation => 
+        return Stations.FirstOrDefault(radioStation => 
             tunerValue >= radioStation.MinTunerValue 
             && tunerValue <= radioStation.MaxTunerValue);
     }
     
-    public IReadOnlyList<RadioStation> GetAllStations() => _stations.AsReadOnly();
+    public IReadOnlyList<RadioStation> GetAllStations() => Stations.AsReadOnly();
     
+    /// <summary>
+    /// Deserialize a RadioStationMap from a JSON file.
+    /// </summary>
+    /// <param name="filePath">Path to .json file.</param>
+    /// <returns>A deserialized RadioStationMap.</returns>
     public static RadioStationMap Load(string filePath)
     {
         try

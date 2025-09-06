@@ -2,7 +2,7 @@ namespace GhostRadio;
 
 public static class Program
 {
-    private const string StaticFile = "static.wav";
+    private const string? StaticFile = "static.wav";
     private const int UpdateIntervalMs = 50;
     
     public static async Task Main(string[] args)
@@ -24,7 +24,7 @@ public static class Program
             hardware: hardware, 
             audioPlayer: audioPlayer, 
             radioStations: radioStations, 
-            staticFile: StaticFile, 
+            staticFilePath: StaticFile, 
             updateIntervalMs: UpdateIntervalMs);
         
         Console.WriteLine("GhostRadio initialized. Press Ctrl+C to exit.");
