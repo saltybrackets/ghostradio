@@ -125,7 +125,7 @@ public class HardwareInterface : IDisposable
 
     public double ReadTunerPercentage()
     {
-        return ReadAnalogPercentage(TunerChannel);
+        return ReadInvertedAnalogPercentage(TunerChannel);
     }
 
     public void Dispose()
