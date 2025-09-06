@@ -1,5 +1,22 @@
 # GhostRadio Project
 
+## Table of Contents 
+- [So what's the point?](#so-whats-the-point)
+- [The other things it will do](#the-other-things-it-will-do)
+- [Assembly](#assembly)
+- [Code](#code)
+- [3D Printing](#3d-printing)
+- [What comes next?](#what-comes-next)
+- [Hardware Requirements](#hardware-requirements)
+- [Hardware Connections](#hardware-connections)
+- [Software Dependencies](#software-dependencies)
+- [Installation](#installation)
+  - [Option 1: Download Pre-built Binary (Recommended)](#option-1-download-pre-built-binary-recommended)
+  - [Option 2: Build from Source](#option-2-build-from-source)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+
 When I was a kid, I was often working with my dad out in the garage, or his shop, or outside. No matter where we were, however, he always kept an old portable transistor radio on him. I didn't love the work, or his choice in music (oldies), but I do maintain a sort of nostalgia for those simpler times.
 
 I also miss the feeling of trying to track down music in a sea of static. Particularly in AM frequencies, there was no telling what you might find. Especially late at night, when you might chance upon some garbled voice you couldn't quite make out... it was eerie, creepy. Was that a ghost in the radio, trying to make contact across the airwaves?
