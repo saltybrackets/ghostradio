@@ -6,7 +6,7 @@ namespace GhostRadio;
 public class RadioStationMap
 {
     [JsonPropertyName("stations")]
-    public List<RadioStation> Stations { get; } = [];
+    public List<RadioStation> Stations { get; set; } = [];
     
     /// <summary>
     /// Return the URL mapped to a given tuner value.
