@@ -137,13 +137,12 @@ Edit `stations.json` to modify radio stations and their corresponding tuner rang
 - Ensure SPI is enabled: `sudo raspi-config` > Interface Options > SPI
 
 **Permission Errors:**
-- Run with sudo for GPIO/SPI access: `sudo dotnet run`
 - Add user to gpio and spi groups: `sudo usermod -a -G gpio,spi $USER` (requires logout/login)
 
 **Audio Issues:**
 - Install VLC libraries: `sudo apt install vlc libvlc-dev`
 - For headless systems, VLC may show PulseAudio errors but audio should still work
-- Use `sudo dotnet run <seconds>` for testing with automatic timeout
+- Use `dotnet run <seconds>` for testing with automatic timeout
 
 **Hardware Issues:**
 - Verify MCP3008 wiring and SPI connections
