@@ -68,6 +68,12 @@ public class HardwareInterface : IDisposable
         var response = new byte[3];
         _spiDevice.TransferFullDuplex(command, response);
         
+        // Debug: log the actual SPI transaction
+        if (channel == 0) // Only log channel 0 to avoid spam
+        {
+            Console.WriteLine($"DEBUG SPI: Sent [{command[0]:X2} {command[1]:X2} {command[2]:X2}] -> Got [{response[0]:X2} {response[1]:X2} {response[2]:X2}]");
+        }
+        
         // Extract 10-bit result from response[1] and response[2]
         var result = ((response[1] & 0x03) << 8) | response[2];
         return result;
