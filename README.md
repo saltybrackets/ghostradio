@@ -1,4 +1,6 @@
 # GhostRadio Project
+
+[![Build and Release](https://github.com/saltybrackets/ghostradio/actions/workflows/build-release.yml/badge.svg)](https://github.com/saltybrackets/ghostradio/actions/workflows/build-release.yml)
 When I was a kid, I was often working with my dad out in the garage, or his shop, or outside. No matter where we were, however, he always kept an old portable transistor radio on him. I didn't love the work, or his choice in music (oldies), but I do maintain a sort of nostalgia for those simpler times.
 
 I also miss the feeling of trying to track down music in a sea of static. Particularly in AM frequencies, there was no telling what you might find. Especially late at night, when you might chance upon some garbled voice you couldn't quite make out... it was eerie, creepy. Was that a ghost in the radio, trying to make contact across the airwaves?
@@ -85,6 +87,28 @@ Other things I want to add:
 
 ## Installation
 
+### Option 1: Download Pre-built Binary (Recommended)
+
+1. Download the latest release from the [Releases page](https://github.com/saltybrackets/ghostradio/releases)
+2. Extract the archive:
+```bash
+tar -xzf ghostradio-linux-arm64.tar.gz
+cd ghostradio-linux-arm64/
+```
+
+3. Install VLC libraries:
+```bash
+sudo apt update
+sudo apt install vlc libvlc-dev
+```
+
+4. Run the application:
+```bash
+sudo ./GhostRadio
+```
+
+### Option 2: Build from Source
+
 1. Install .NET 8.0 on your Raspberry Pi:
 ```bash
 curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0 --runtime aspnetcore
@@ -92,7 +116,7 @@ curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel 8.0 -
 
 2. Clone and build the project:
 ```bash
-git clone <repository>
+git clone https://github.com/saltybrackets/ghostradio.git
 cd ghostradio
 dotnet build -c Release
 ```
