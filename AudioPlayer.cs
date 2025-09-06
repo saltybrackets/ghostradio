@@ -1,79 +1,101 @@
 using LibVLCSharp.Shared;
 
-namespace GhostRadio.Audio;
+namespace GhostRadio;
 
 public class AudioPlayer : IDisposable
 {
-    private readonly LibVLC _libVLC;
+    private readonly LibVLC _libVlc;
     private readonly MediaPlayer _mediaPlayer;
-    private string? _currentStationUrl;
+    private string? _currentAudioSourceSource;
     private bool _disposed = false;
 
+    /// <summary>
+    /// Whether audio is currently playing.
+    /// </summary>
+    public bool IsPlaying => _mediaPlayer.IsPlaying;
+
+    /// <summary>
+    /// Which station is currently playing.
+    /// </summary>
+    public string? CurrentAudioSource => _currentAudioSourceSource;
+    
     public AudioPlayer()
     {
         Core.Initialize();
-        _libVLC = new LibVLC();
-        _mediaPlayer = new MediaPlayer(_libVLC);
+        _libVlc = new LibVLC();
+        _mediaPlayer = new MediaPlayer(_libVlc);
     }
 
+    /// <summary>
+    /// Set current volume of the AudioPlayer.
+    /// </summary>
+    /// <param name="volumePercentage">A value between 0 and 1.</param>
     public void SetVolume(double volumePercentage)
     {
-        var volume = Math.Max(0, Math.Min(100, (int)volumePercentage));
+        int volume = Math.Max(0, Math.Min(100, (int)volumePercentage));
         _mediaPlayer.Volume = volume;
     }
 
-    public void PlayStation(string stationUrl)
+    /// <summary>
+    /// Stream audio from a given URL.
+    /// </summary>
+    /// <param name="audioUrl">URL of audio to stream.</param>
+    public void PlayStreamingAudio(string audioUrl)
     {
-        if (_currentStationUrl == stationUrl && _mediaPlayer.IsPlaying)
+        if (_currentAudioSourceSource == audioUrl && _mediaPlayer.IsPlaying)
         {
-            return; // Already playing this station
+            return; // Already playing
         }
 
-        _currentStationUrl = stationUrl;
+        _currentAudioSourceSource = audioUrl;
         
-        var media = new Media(_libVLC, stationUrl, FromType.FromLocation);
+        Media media = new Media(_libVlc, audioUrl, FromType.FromLocation);
         _mediaPlayer.Media = media;
         _mediaPlayer.Play();
     }
 
-    public void PlayStaticFile(string staticFilePath)
+    /// <summary>
+    /// Play audio from a local file source.
+    /// </summary>
+    /// <param name="filePath">Path to a local file to play.</param>
+    public void PlayLocalAudio(string filePath)
     {
-        if (!File.Exists(staticFilePath))
+        if (!File.Exists(filePath))
         {
-            Console.WriteLine($"Static file not found: {staticFilePath}");
+            Console.WriteLine($"Local audio file not found: {filePath}");
             return;
         }
 
-        if (_currentStationUrl == staticFilePath && _mediaPlayer.IsPlaying)
+        if (_currentAudioSourceSource == filePath 
+            && _mediaPlayer.IsPlaying)
         {
-            return; // Already playing static
+            return; // Already playing.
         }
 
-        _currentStationUrl = staticFilePath;
+        _currentAudioSourceSource = filePath;
         
-        var media = new Media(_libVLC, staticFilePath, FromType.FromPath);
+        Media media = new Media(_libVlc, filePath);
         _mediaPlayer.Media = media;
         _mediaPlayer.Play();
     }
 
+    /// <summary>
+    /// Stop audio playback.
+    /// </summary>
     public void Stop()
     {
         _mediaPlayer.Stop();
-        _currentStationUrl = null;
+        _currentAudioSourceSource = null;
     }
-
-    public bool IsPlaying => _mediaPlayer.IsPlaying;
-
-    public string? CurrentStation => _currentStationUrl;
 
     public void Dispose()
     {
-        if (!_disposed)
-        {
-            _mediaPlayer?.Stop();
-            _mediaPlayer?.Dispose();
-            _libVLC?.Dispose();
-            _disposed = true;
-        }
+        if (_disposed) 
+            return;
+        
+        _mediaPlayer.Stop();
+        _mediaPlayer.Dispose();
+        _libVlc.Dispose();
+        _disposed = true;
     }
 }

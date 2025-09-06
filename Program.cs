@@ -1,13 +1,9 @@
-using GhostRadio.Audio;
-using GhostRadio.Hardware;
-using GhostRadio.Services;
-
 namespace GhostRadio;
 
-public class Program
+public static class Program
 {
-    public const string StaticFile = "static.wav";
-    public const int UpdateIntervalMs = 50;
+    private const string StaticFile = "static.wav";
+    private const int UpdateIntervalMs = 50;
     
     public static async Task Main(string[] args)
     {
@@ -21,15 +17,19 @@ public class Program
             Console.WriteLine($"Running in test mode for {duration} seconds...");
         }
         
-        using var hardware = new HardwareInterface();
-        using var audioPlayer = new AudioPlayer();
-        var stationService = new StationService();
-        
-        var ghostRadio = new GhostRadioController(hardware, audioPlayer, stationService, StaticFile, UpdateIntervalMs);
+        using HardwareInterface hardware = new HardwareInterface();
+        using AudioPlayer audioPlayer = new AudioPlayer();
+        RadioStationMap radioStations = RadioStationMap.Load("stations.json");
+        GhostRadioController ghostRadio = new GhostRadioController(
+            hardware: hardware, 
+            audioPlayer: audioPlayer, 
+            radioStations: radioStations, 
+            staticFile: StaticFile, 
+            updateIntervalMs: UpdateIntervalMs);
         
         Console.WriteLine("GhostRadio initialized. Press Ctrl+C to exit.");
         
-        var cancellationTokenSource = new CancellationTokenSource();
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) =>
         {
             e.Cancel = true;

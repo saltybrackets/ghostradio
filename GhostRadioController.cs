@@ -1,33 +1,14 @@
-using GhostRadio.Audio;
-using GhostRadio.Hardware;
-using GhostRadio.Services;
-
 namespace GhostRadio;
 
-public class GhostRadioController
+public class GhostRadioController(
+    HardwareInterface hardware,
+    AudioPlayer audioPlayer,
+    RadioStationMap radioStations,
+    string staticFile,
+    int updateIntervalMs)
 {
-    private readonly HardwareInterface _hardware;
-    private readonly AudioPlayer _audioPlayer;
-    private readonly StationService _stationService;
-    private readonly string _staticFile;
-    private readonly int _updateIntervalMs;
-    
     private bool _powerState = false;
-    private string? _currentStationUrl = null;
-
-    public GhostRadioController(
-        HardwareInterface hardware, 
-        AudioPlayer audioPlayer, 
-        StationService stationService,
-        string staticFile,
-        int updateIntervalMs)
-    {
-        _hardware = hardware;
-        _audioPlayer = audioPlayer;
-        _stationService = stationService;
-        _staticFile = staticFile;
-        _updateIntervalMs = updateIntervalMs;
-    }
+    private string _currentStationUrl = null;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
@@ -36,9 +17,9 @@ public class GhostRadioController
             try
             {
                 // Read hardware inputs
-                var powerSwitch = _hardware.ReadPowerSwitch();
-                var tunerValue = _hardware.ReadTunerPercentage();
-                var volumeValue = _hardware.ReadVolumePercentage();
+                bool powerSwitch = hardware.ReadPowerSwitch();
+                double tunerValue = hardware.ReadTunerPercentage();
+                double volumeValue = hardware.ReadVolumePercentage();
 
                 // Handle power state changes
                 if (powerSwitch != _powerState)
@@ -52,50 +33,50 @@ public class GhostRadioController
                     else
                     {
                         Console.WriteLine("Power OFF");
-                        _audioPlayer.Stop();
-                        _currentStationUrl = null;
+                        audioPlayer.Stop();
+                        _currentStationUrl = string.Empty;
                     }
                 }
 
                 if (_powerState)
                 {
                     // Update volume
-                    _audioPlayer.SetVolume(volumeValue);
+                    audioPlayer.SetVolume(volumeValue);
 
                     // Handle station tuning
-                    var stationUrl = _stationService.GetStationUrl(tunerValue);
+                    string stationUrl = radioStations.GetStationUrl(tunerValue);
                     
-                    if (stationUrl != null)
+                    if (!string.IsNullOrEmpty(stationUrl))
                     {
                         // Found a station
                         if (_currentStationUrl != stationUrl)
                         {
                             Console.WriteLine($"\nTuning to station: {stationUrl}");
-                            _audioPlayer.PlayStation(stationUrl);
+                            audioPlayer.PlayStreamingAudio(stationUrl);
                             _currentStationUrl = stationUrl;
                         }
                     }
                     else
                     {
                         // No station found, play static
-                        if (_currentStationUrl != _staticFile)
+                        if (_currentStationUrl != staticFile)
                         {
                             Console.WriteLine($"\nNo station matched. Playing static.");
-                            _audioPlayer.PlayStaticFile(_staticFile);
-                            _currentStationUrl = _staticFile;
+                            audioPlayer.PlayLocalAudio(staticFile);
+                            _currentStationUrl = staticFile;
                         }
                     }
 
                     // Optional: Log current state periodically
-                    if (DateTime.Now.Millisecond % 1000 < _updateIntervalMs)
+                    if (DateTime.Now.Millisecond % 1000 < updateIntervalMs)
                     {
-                        var station = _stationService.GetStation(tunerValue);
-                        var stationInfo = station != null ? $"Station: {station.Url}" : "Static";
+                        RadioStation? station = radioStations.GetStation(tunerValue);
+                        string stationInfo = station != null ? $"Station: {station.Url}" : "Static";
                         Console.Write($"\rPower: {_powerState}  Tuner: {tunerValue:F1}  Volume: {volumeValue:F1}  {stationInfo}");
                     }
                 }
 
-                await Task.Delay(_updateIntervalMs, cancellationToken);
+                await Task.Delay(updateIntervalMs, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -109,6 +90,6 @@ public class GhostRadioController
             }
         }
         
-        _audioPlayer.Stop();
+        audioPlayer.Stop();
     }
 }

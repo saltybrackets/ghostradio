@@ -2,7 +2,7 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using Iot.Device.Adc;
 
-namespace GhostRadio.Hardware;
+namespace GhostRadio;
 
 public class HardwareInterface : IDisposable
 {
@@ -56,7 +56,7 @@ public class HardwareInterface : IDisposable
 
     public double ReadAnalogPercentage(int channel)
     {
-        var rawValue = ReadMcp3008Channel(channel);
+        int rawValue = ReadMcp3008Channel(channel);
         
         return (rawValue / 1023.0) * 100.0;
     }
@@ -67,9 +67,9 @@ public class HardwareInterface : IDisposable
         _gpio.Write(SpiChipSelectPin, PinValue.Low); // Start transaction
         
         // Send command: start bit + single-ended + channel
-        var command = 0x18 | channel; // 11000 + 3-bit channel (0x18 = 24 = 11000 binary)
+        int command = 0x18 | channel; // 11000 + 3-bit channel (0x18 = 24 = 11000 binary)
         
-        var result = 0;
+        int result = 0;
         
         // Send 5 command bits
         for (int i = 4; i >= 0; i--)
@@ -108,9 +108,9 @@ public class HardwareInterface : IDisposable
 
     public double ReadVolumePercentage()
     {
-        var rawValue = ReadMcp3008Channel(VolumeChannel);
-        var normalizedValue = rawValue / 1023.0;
-        var linearVolume = normalizedValue * 100.0;
+        int rawValue = ReadMcp3008Channel(VolumeChannel);
+        double normalizedValue = rawValue / 1023.0;
+        double linearVolume = normalizedValue * 100.0;
 
         if (linearVolume >= 90.0)
         {
@@ -118,7 +118,7 @@ public class HardwareInterface : IDisposable
         }
         else
         {
-            var scaled = Math.Pow(linearVolume / 90.0, 0.15) * 90.0;
+            double scaled = Math.Pow(linearVolume / 90.0, 0.15) * 90.0;
             return scaled < 30 ? 0.0 : scaled;
         }
     }
