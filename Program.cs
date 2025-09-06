@@ -13,6 +13,14 @@ public class Program
     {
         Console.WriteLine("GhostRadio starting...");
         
+        // Parse command line arguments
+        int? testDurationSeconds = null;
+        if (args.Length > 0 && int.TryParse(args[0], out int duration))
+        {
+            testDurationSeconds = duration;
+            Console.WriteLine($"Running in test mode for {duration} seconds...");
+        }
+        
         using var hardware = new HardwareInterface();
         using var audioPlayer = new AudioPlayer();
         var stationService = new StationService();
@@ -27,6 +35,12 @@ public class Program
             e.Cancel = true;
             cancellationTokenSource.Cancel();
         };
+        
+        // Set timeout if test duration is specified
+        if (testDurationSeconds.HasValue)
+        {
+            cancellationTokenSource.CancelAfter(TimeSpan.FromSeconds(testDurationSeconds.Value));
+        }
         
         await ghostRadio.RunAsync(cancellationTokenSource.Token);
         
