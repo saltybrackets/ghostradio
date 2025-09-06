@@ -25,10 +25,10 @@ public class HardwareInterface : IDisposable
         // Initialize power switch pin
         _gpio.OpenPin(PowerSwitchPin, PinMode.InputPullUp);
         
-        // Initialize SPI for MCP3008
+        // Initialize SPI for MCP3008 with slower clock
         var spiSettings = new SpiConnectionSettings(0, 1)
         {
-            ClockFrequency = 1000000,
+            ClockFrequency = 500000, // Slower clock - try 500kHz
             Mode = SpiMode.Mode0,
             DataBitLength = 8
         };
@@ -36,9 +36,9 @@ public class HardwareInterface : IDisposable
         _spiDevice = SpiDevice.Create(spiSettings);
         Console.WriteLine($"DEBUG: SPI device created: {_spiDevice != null}");
         
-        // Try with explicit reference voltage (3.3V for Pi)
-        _adc = new Mcp3008(_spiDevice, 3.3);
-        Console.WriteLine($"DEBUG: MCP3008 initialized with Vref=3.3V");
+        // Initialize MCP3008
+        _adc = new Mcp3008(_spiDevice);
+        Console.WriteLine($"DEBUG: MCP3008 initialized");
     }
 
     public bool ReadPowerSwitch()
