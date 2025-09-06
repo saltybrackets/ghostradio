@@ -25,8 +25,8 @@ public class HardwareInterface : IDisposable
         // Initialize power switch pin
         _gpio.OpenPin(PowerSwitchPin, PinMode.InputPullUp);
         
-        // Try SPI device 0.0 instead of 0.1 - maybe hardware uses different CS
-        var spiSettings = new SpiConnectionSettings(0, 0)
+        // Back to spidev0.1 since 0.0 doesn't exist
+        var spiSettings = new SpiConnectionSettings(0, 1)
         {
             ClockFrequency = 500000, // Slower clock - try 500kHz
             Mode = SpiMode.Mode0,
@@ -49,18 +49,28 @@ public class HardwareInterface : IDisposable
 
     public double ReadAnalogPercentage(int channel)
     {
-        var rawValue = _adc.Read(channel);
-        Console.WriteLine($"DEBUG: Channel {channel} raw value: {rawValue}");
-        
-        // Test all channels to see if any have data
-        for (int i = 0; i < 8; i++)
-        {
-            var testValue = _adc.Read(i);
-            if (testValue > 0)
-                Console.WriteLine($"DEBUG: Found non-zero value {testValue} on channel {i}");
-        }
+        // Try raw SPI communication instead of using MCP3008 library
+        var rawValue = ReadMcp3008Channel(channel);
+        Console.WriteLine($"DEBUG: Channel {channel} raw value: {rawValue} (raw SPI)");
         
         return (rawValue / 1023.0) * 100.0;
+    }
+    
+    private int ReadMcp3008Channel(int channel)
+    {
+        // MCP3008 SPI protocol: send 3 bytes, get 3 bytes back
+        // Start bit (1) + SGL/DIFF (1 for single-ended) + D2 D1 D0 (channel) + don't care bits
+        var command = new byte[3];
+        command[0] = 0x01; // Start bit
+        command[1] = (byte)(0x80 | (channel << 4)); // Single-ended + channel
+        command[2] = 0x00; // Don't care
+        
+        var response = new byte[3];
+        _spiDevice.TransferFullDuplex(command, response);
+        
+        // Extract 10-bit result from response[1] and response[2]
+        var result = ((response[1] & 0x03) << 8) | response[2];
+        return result;
     }
 
     public double ReadInvertedAnalogPercentage(int channel)
@@ -70,8 +80,8 @@ public class HardwareInterface : IDisposable
 
     public double ReadVolumePercentage()
     {
-        var rawValue = _adc.Read(VolumeChannel);
-        Console.WriteLine($"DEBUG: Volume channel raw value: {rawValue}");
+        var rawValue = ReadMcp3008Channel(VolumeChannel);
+        Console.WriteLine($"DEBUG: Volume channel raw value: {rawValue} (raw SPI)");
         var normalizedValue = rawValue / 1023.0;
         var linearVolume = normalizedValue * 100.0;
 
