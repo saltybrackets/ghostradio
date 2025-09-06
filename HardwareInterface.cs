@@ -29,11 +29,16 @@ public class HardwareInterface : IDisposable
         var spiSettings = new SpiConnectionSettings(0, 1)
         {
             ClockFrequency = 1000000,
-            Mode = SpiMode.Mode0
+            Mode = SpiMode.Mode0,
+            DataBitLength = 8
         };
         
         _spiDevice = SpiDevice.Create(spiSettings);
-        _adc = new Mcp3008(_spiDevice);
+        Console.WriteLine($"DEBUG: SPI device created: {_spiDevice != null}");
+        
+        // Try with explicit reference voltage (3.3V for Pi)
+        _adc = new Mcp3008(_spiDevice, 3.3);
+        Console.WriteLine($"DEBUG: MCP3008 initialized with Vref=3.3V");
     }
 
     public bool ReadPowerSwitch()
