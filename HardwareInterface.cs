@@ -50,6 +50,15 @@ public class HardwareInterface : IDisposable
     {
         var rawValue = _adc.Read(channel);
         Console.WriteLine($"DEBUG: Channel {channel} raw value: {rawValue}");
+        
+        // Test all channels to see if any have data
+        for (int i = 0; i < 8; i++)
+        {
+            var testValue = _adc.Read(i);
+            if (testValue > 0)
+                Console.WriteLine($"DEBUG: Found non-zero value {testValue} on channel {i}");
+        }
+        
         return (rawValue / 1023.0) * 100.0;
     }
 
