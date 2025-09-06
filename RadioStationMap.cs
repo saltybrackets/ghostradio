@@ -9,29 +9,32 @@ public class RadioStationMap
     public List<RadioStation> Stations { get; set; } = [];
     
     /// <summary>
+    /// Return the RadioStation object mapped to a given tuner value.
+    /// </summary>
+    /// <param name="tunerValue">Value of tuner to get associated radio station URL.</param>
+    /// <returns>RadioStation mapped to the tuner value, or null if nothing is mapped.</returns>
+    public RadioStation? GetStation(double tunerValue)
+    {
+        foreach (var radioStation in Stations)
+        {
+            if (tunerValue >= radioStation.MinTunerValue
+                && tunerValue <= radioStation.MaxTunerValue)
+            {
+                return radioStation;
+            }
+        }
+
+        return null;
+    }
+    
+    /// <summary>
     /// Return the URL mapped to a given tuner value.
     /// </summary>
     /// <param name="tunerValue">Value of tuner to get associated radio station URL.</param>
     /// <returns>URL if tuner value maps to a station, or empty if nothing is mapped.</returns>
     public string GetStationUrl(double tunerValue)
     {
-        foreach (RadioStation station in Stations)
-        {
-            if (tunerValue >= station.MinTunerValue
-                && tunerValue <= station.MaxTunerValue)
-            {
-                return station.Url;
-            }
-        }
-        
-        return string.Empty;
-    }
-    
-    public RadioStation? GetStation(double tunerValue)
-    {
-        return Stations.FirstOrDefault(radioStation => 
-            tunerValue >= radioStation.MinTunerValue 
-            && tunerValue <= radioStation.MaxTunerValue);
+        return GetStation(tunerValue)?.Url ?? string.Empty;
     }
     
     public IReadOnlyList<RadioStation> GetAllStations() => Stations.AsReadOnly();
