@@ -26,7 +26,7 @@ public class HardwareInterface : IDisposable
         _gpio.OpenPin(PowerSwitchPin, PinMode.InputPullUp);
         
         // Initialize SPI for MCP3008
-        var spiSettings = new SpiConnectionSettings(0, 0)
+        var spiSettings = new SpiConnectionSettings(0, 1)
         {
             ClockFrequency = 1000000,
             Mode = SpiMode.Mode0
