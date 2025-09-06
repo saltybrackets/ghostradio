@@ -129,7 +129,23 @@ Edit `stations.json` to modify radio stations and their corresponding tuner rang
 
 ## Troubleshooting
 
+### Common Issues
+
+**SPI Device Not Found Error:**
+- If you get "Can not open SPI device file '/dev/spidev0.0'", check available SPI devices with `ls -la /dev/spi*`
+- The project uses `/dev/spidev0.1` by default - if your Pi has a different SPI device, update `HardwareInterface.cs`
 - Ensure SPI is enabled: `sudo raspi-config` > Interface Options > SPI
-- Grant GPIO permissions or run with sudo
+
+**Permission Errors:**
+- Run with sudo for GPIO/SPI access: `sudo dotnet run`
+- Add user to gpio and spi groups: `sudo usermod -a -G gpio,spi $USER` (requires logout/login)
+
+**Audio Issues:**
+- Install VLC libraries: `sudo apt install vlc libvlc-dev`
+- For headless systems, VLC may show PulseAudio errors but audio should still work
+- Use `sudo dotnet run <seconds>` for testing with automatic timeout
+
+**Hardware Issues:**
 - Verify MCP3008 wiring and SPI connections
-- Check that LibVLC is properly installed
+- Test analog inputs show changing values when adjusting potentiometers
+- Check GPIO connections with `gpio readall` command
