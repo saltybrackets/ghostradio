@@ -42,7 +42,7 @@ public class HardwareInterface : IDisposable
         _gpio.Write(SpiMosiPin, PinValue.Low);
         _gpio.Write(SpiChipSelectPin, PinValue.High); // Chip select is active low
         
-        Console.WriteLine($"DEBUG: Software SPI initialized");
+        Console.WriteLine("Hardware interface initialized (software SPI mode)");
         
         // Note: _adc and _spiDevice are not used in software SPI mode
         _adc = null!;
@@ -56,9 +56,7 @@ public class HardwareInterface : IDisposable
 
     public double ReadAnalogPercentage(int channel)
     {
-        // Try raw SPI communication instead of using MCP3008 library
         var rawValue = ReadMcp3008Channel(channel);
-        Console.WriteLine($"DEBUG: Channel {channel} raw value: {rawValue} (raw SPI)");
         
         return (rawValue / 1023.0) * 100.0;
     }
@@ -98,10 +96,7 @@ public class HardwareInterface : IDisposable
         
         _gpio.Write(SpiChipSelectPin, PinValue.High); // End transaction
         
-        if (channel == 0) // Debug logging for channel 0
-        {
-            Console.WriteLine($"DEBUG Software SPI: Channel {channel} -> {result}");
-        }
+        // Software SPI communication complete
         
         return result;
     }
@@ -114,7 +109,6 @@ public class HardwareInterface : IDisposable
     public double ReadVolumePercentage()
     {
         var rawValue = ReadMcp3008Channel(VolumeChannel);
-        Console.WriteLine($"DEBUG: Volume channel raw value: {rawValue} (raw SPI)");
         var normalizedValue = rawValue / 1023.0;
         var linearVolume = normalizedValue * 100.0;
 
