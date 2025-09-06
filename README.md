@@ -6,7 +6,7 @@ I also miss the feeling of trying to track down music in a sea of static. Partic
 I want to reproduce that nostalgia. So I bought an old 1960's transistor radio on eBay, ripping out most of the electrical components inside. These old "lunchbox" style radios make it particularly easy, as the entire back is just a panel that you can unbutton and swing open to look at the internals.
 
 ## So what's the point?
-The goal is to have an oldschool analog radio that mostly still functions as one. However, I'm not interested in listening to the music you would normally find on AM and FM stations. I like ambient music, video game music, lofi, soundscapes, etc.
+The goal is to have an old school analog radio that mostly still functions as one. However, I'm not interested in listening to the music you would normally find on AM and FM stations. I like ambient music, video game music, lofi, soundscapes, etc.
 
 So instead, when you turn the dial and search through static, instead you get online radio stations!
 
@@ -35,7 +35,7 @@ The Pi really only reads two analog signals right now. One from the volume knob,
 It's' janky as hell, but it all works!
 
 ## Code
-I really wanted to do the programming in my language of choice, C#, but I just couldn't get it to read the MCP3008 chip, so I eventually resorted to Python, which I'd done my initial testing with. Maybe one day I'll try again with C#, but for now, you get my sloppy code while I just throw random bullshit at each obstacle I run into.
+Most of the code right now is trial and error, so it'll be pretty rough and badly organized until I get all functionality working the way I like. After, I'll refactor everything to be a bit more sane.
 
 The volume potentiometer, being so old, is pretty obviously damaged, so I don't get smooth signals from it. And I don't mean it's logarithmic (I mean, it is that, too), I mean it behaves almost like an S-curve in how it reads values. So the code has to account for that.
 
@@ -43,7 +43,7 @@ As for the "linear" tuner potentiometer, I didn't feel like normalizing the valu
 
 Stations reside in a json file, keyed on ranges of pot values.
 
-Audio is played/streamed using the VLC python library.
+Audio is played/streamed using the LibVLCSharp library. So VLC does need to be installed.
 
 ## 3D Printing
 This project eventually inspired me to get my own 3D printer to design my own housing for the internal parts (of course, I have lots of other project in mind I'll use the printer for).
