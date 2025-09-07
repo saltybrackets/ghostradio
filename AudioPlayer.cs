@@ -40,7 +40,7 @@ public class AudioPlayer : IDisposable
     /// Stream audio from a given URL.
     /// </summary>
     /// <param name="audioUrl">URL of audio to stream.</param>
-    public void PlayStreamingAudio(string? audioUrl)
+    public void PlayStreamingAudio(string audioUrl)
     {
         if (_currentAudioSourceSource == audioUrl && _mediaPlayer.IsPlaying)
         {
@@ -58,7 +58,8 @@ public class AudioPlayer : IDisposable
     /// Play audio from a local file source.
     /// </summary>
     /// <param name="filePath">Path to a local file to play.</param>
-    public void PlayLocalAudio(string? filePath)
+    /// <param name="loop">Whether to loop the audio (default: false).</param>
+    public void PlayLocalAudio(string? filePath, bool loop = false)
     {
         if (!File.Exists(filePath))
         {
@@ -73,8 +74,12 @@ public class AudioPlayer : IDisposable
         }
 
         _currentAudioSourceSource = filePath;
+
+        string[] options = loop
+            ? [":input-repeat=-1"]
+            : [];
         
-        Media media = new Media(_libVlc, filePath);
+        Media media = new Media(_libVlc, filePath, FromType.FromPath, options);
         _mediaPlayer.Media = media;
         _mediaPlayer.Play();
     }
