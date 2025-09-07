@@ -5,7 +5,8 @@ public class GhostRadio(
     AudioPlayer audioPlayer,
     RadioStationMap radioStations,
     string staticFilePath,
-    int updateIntervalMs)
+    int updateIntervalMs,
+    bool verboseLogging = false)
 {
     private bool _powerState = false;
     private string? _currentStationUrl = null;
@@ -44,7 +45,7 @@ public class GhostRadio(
                     audioPlayer.SetVolume(volumeValue);
 
                     // Handle station tuning
-                    string? stationUrl = radioStations.GetStationUrl(tunerValue);
+                    string stationUrl = radioStations.GetStationUrl(tunerValue);
                     
                     if (!string.IsNullOrEmpty(stationUrl))
                     {
@@ -62,13 +63,14 @@ public class GhostRadio(
                         if (_currentStationUrl != staticFilePath)
                         {
                             Console.WriteLine($"\nNo station matched. Playing static.");
-                            audioPlayer.PlayLocalAudio(staticFilePath);
+                            audioPlayer.PlayLocalAudio(staticFilePath, loop: true);
                             _currentStationUrl = staticFilePath;
                         }
                     }
 
                     // Optional: Log current state periodically
-                    if (DateTime.Now.Millisecond % 1000 < updateIntervalMs)
+                    if (verboseLogging
+                        && DateTime.Now.Millisecond % 1000 < updateIntervalMs)
                     {
                         RadioStation? station = radioStations.GetStation(tunerValue);
                         string stationInfo = station != null ? $"Station: {station.Url}" : "Static";
@@ -80,7 +82,7 @@ public class GhostRadio(
             }
             catch (OperationCanceledException)
             {
-                Console.WriteLine(); // New line before exit
+                Console.WriteLine();
                 break;
             }
             catch (Exception ex)
