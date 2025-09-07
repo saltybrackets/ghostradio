@@ -55,7 +55,7 @@ public class RadioStationMap
             }
 
             string jsonContent = File.ReadAllText(filePath);
-            RadioStationMap? stationMap = JsonSerializer.Deserialize<RadioStationMap>(jsonContent);
+            RadioStationMap? stationMap = JsonSerializer.Deserialize<RadioStationMap>(jsonContent, GhostRadioJsonContext.Default.RadioStationMap);
             
             return stationMap ?? new RadioStationMap();
         }
