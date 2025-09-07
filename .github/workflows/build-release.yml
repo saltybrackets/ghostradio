@@ -46,13 +46,34 @@ jobs:
         path: ghostradio-linux-arm64.tar.gz
         retention-days: 30
         
-    - name: Release binaries
-      if: github.event_name == 'release'
+    - name: Get short SHA
+      id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}-${{ steps.vars.outputs.sha_short }}
+        release_name: Build ${{ github.run_number }}
+        body: |
+          Automated release from commit ${{ github.sha }}
+          
+          Changes in this build:
+          ${{ github.event.head_commit.message }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload Release Asset
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ github.event.release.upload_url }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./ghostradio-linux-arm64.tar.gz
         asset_name: ghostradio-linux-arm64.tar.gz
         asset_content_type: application/gzip
