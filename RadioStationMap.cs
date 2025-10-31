@@ -50,13 +50,21 @@ public class RadioStationMap
         {
             if (!File.Exists(filePath))
             {
-                Console.WriteLine($"Station file not found: {filePath}");
-                return new RadioStationMap();
+                Console.WriteLine($"Station file not found: {filePath}. Creating empty stations.json...");
+                var emptyMap = new RadioStationMap();
+
+                // Create the file with an empty station list
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(emptyMap, GhostRadioJsonContext.Default.RadioStationMap);
+                File.WriteAllText(filePath, json);
+
+                Console.WriteLine($"Created empty stations file at: {filePath}");
+                return emptyMap;
             }
 
             string jsonContent = File.ReadAllText(filePath);
             RadioStationMap? stationMap = JsonSerializer.Deserialize<RadioStationMap>(jsonContent, GhostRadioJsonContext.Default.RadioStationMap);
-            
+
             return stationMap ?? new RadioStationMap();
         }
         catch (Exception ex)
