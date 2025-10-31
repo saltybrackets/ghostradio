@@ -3,25 +3,21 @@ namespace GhostRadio.Services;
 public class RadioStateService
 {
     private readonly GhostRadioController _ghostRadio;
-    private readonly IHardwareInterface _hardware;
 
-    public RadioStateService(GhostRadioController ghostRadio, IHardwareInterface hardware)
+    public RadioStateService(GhostRadioController ghostRadio)
     {
         _ghostRadio = ghostRadio;
-        _hardware = hardware;
     }
 
     public RadioState GetCurrentState()
     {
-        bool powerSwitch = _hardware.ReadPowerSwitch();
-        double tunerValue = _hardware.ReadTunerPercentage();
-        double volumeValue = _hardware.ReadVolumePercentage();
-
+        // Use cached values from the controller instead of reading hardware directly
+        // This prevents SPI bus contention and race conditions
         return new RadioState
         {
-            IsPoweredOn = powerSwitch,
-            TunerPosition = tunerValue,
-            VolumeLevel = volumeValue,
+            IsPoweredOn = _ghostRadio.PowerState,
+            TunerPosition = _ghostRadio.TunerPosition,
+            VolumeLevel = _ghostRadio.VolumeLevel,
             CurrentStationUrl = _ghostRadio.CurrentStationUrl
         };
     }
