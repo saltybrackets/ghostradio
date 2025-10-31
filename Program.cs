@@ -36,7 +36,7 @@ public static class Program
                 Console.WriteLine("Arguments:");
                 Console.WriteLine("  duration         Test duration in seconds (optional)");
                 Console.WriteLine();
-                Console.WriteLine("Default: Runs both console and web interface on port 80 (or 5000 in mock mode)");
+                Console.WriteLine("Default: Runs web interface on port 80 (or 5000 in mock mode)");
                 return;
             }
             else if (int.TryParse(arg, out int duration))
@@ -45,10 +45,9 @@ public static class Program
             }
         }
 
-        // Default to both modes if neither specified
+        // Default to web-only mode if neither specified
         if (!consoleMode && !webMode)
         {
-            consoleMode = true;
             webMode = true;
         }
 
