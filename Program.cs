@@ -36,7 +36,7 @@ public static class Program
                 Console.WriteLine("Arguments:");
                 Console.WriteLine("  duration         Test duration in seconds (optional)");
                 Console.WriteLine();
-                Console.WriteLine("Default: Runs web interface on port 80 (or 5000 in mock mode)");
+                Console.WriteLine("Default: Runs web interface on port 5000");
                 return;
             }
             else if (int.TryParse(arg, out int duration))
@@ -65,11 +65,10 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder();
 
-        // Configure Kestrel to listen on port 80 (production) or 5000 (mock mode)
-        int port = mockMode ? 5000 : 80;
+        // Configure Kestrel to listen on port 5000
         builder.WebHost.ConfigureKestrel(serverOptions =>
         {
-            serverOptions.ListenAnyIP(port);
+            serverOptions.ListenAnyIP(5000);
         });
 
         // Add services to the container
@@ -131,7 +130,7 @@ public static class Program
             .AddInteractiveServerRenderMode();
 
         Console.WriteLine("GhostRadio starting...");
-        Console.WriteLine($"Web interface available at: http://localhost{(port == 80 ? "" : $":{port}")}");
+        Console.WriteLine("Web interface available at: http://localhost:5000");
 
         if (testDurationSeconds.HasValue)
         {
