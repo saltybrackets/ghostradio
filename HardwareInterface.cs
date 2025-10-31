@@ -4,7 +4,7 @@ using Iot.Device.Adc;
 
 namespace GhostRadio;
 
-public class HardwareInterface : IDisposable
+public class HardwareInterface : IHardwareInterface
 {
     private readonly GpioController _gpio;
     private readonly Mcp3008 _adc;

@@ -2,7 +2,7 @@ using LibVLCSharp.Shared;
 
 namespace GhostRadio;
 
-public class AudioPlayer : IDisposable
+public class AudioPlayer : IAudioPlayer
 {
     private readonly LibVLC _libVlc;
     private readonly MediaPlayer _mediaPlayer;
