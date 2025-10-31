@@ -1,8 +1,8 @@
 namespace GhostRadio;
 
-public class GhostRadio(
-    HardwareInterface hardware,
-    AudioPlayer audioPlayer,
+public class GhostRadioController(
+    IHardwareInterface hardware,
+    IAudioPlayer audioPlayer,
     RadioStationMap radioStations,
     string staticFilePath,
     int updateIntervalMs,
@@ -10,6 +10,8 @@ public class GhostRadio(
 {
     private bool _powerState = false;
     private string? _currentStationUrl = null;
+
+    public string? CurrentStationUrl => _currentStationUrl;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
