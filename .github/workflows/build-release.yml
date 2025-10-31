@@ -35,7 +35,7 @@ jobs:
     - name: Create artifact archive
       run: |
         cd publish
-        tar -czf ../ghostradio-linux-arm64.tar.gz GhostRadio stations.json static.wav
+        tar -czf ../ghostradio-linux-arm64.tar.gz GhostRadio stations.json static.wav wwwroot/
         cd ..
         
     - name: Upload build artifact
