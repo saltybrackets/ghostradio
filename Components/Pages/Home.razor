@@ -1,0 +1,283 @@
+@page "/"
+@rendermode InteractiveServer
+@using GhostRadio.Services
+@inject RadioStateService RadioStateService
+@inject StationManagementService StationService
+@inject MockHardwareControlService MockControlService
+@implements IDisposable
+
+<PageTitle>GhostRadio</PageTitle>
+
+<div class="container">
+    <pre class="ascii-art">
+  ██████╗ ██╗  ██╗ ██████╗ ███████╗████████╗    ██████╗  █████╗ ██████╗ ██╗ ██████╗
+ ██╔════╝ ██║  ██║██╔═══██╗██╔════╝╚══██╔══╝    ██╔══██╗██╔══██╗██╔══██╗██║██╔═══██╗
+ ██║  ███╗███████║██║   ██║███████╗   ██║       ██████╔╝███████║██║  ██║██║██║   ██║
+ ██║   ██║██╔══██║██║   ██║╚════██║   ██║       ██╔══██╗██╔══██║██║  ██║██║██║   ██║
+ ╚██████╔╝██║  ██║╚██████╔╝███████║   ██║       ██║  ██║██║  ██║██████╔╝██║╚██████╔╝
+  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝ ╚═════╝
+    </pre>
+
+    <div class="radio-status">
+        <h2>Radio Status</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <span class="status-label">Power:</span>
+                <span class="status-value @(radioState?.IsPoweredOn == true ? "on" : "off")">
+                    @(radioState?.IsPoweredOn == true ? "ON" : "OFF")
+                </span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Tuner Position:</span>
+                <span class="status-value">@(radioState?.TunerPosition.ToString("F1") ?? "0.0")%</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Volume:</span>
+                <span class="status-value">@(radioState?.VolumeLevel.ToString("F1") ?? "0.0")%</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Current Station:</span>
+                <span class="status-value">@(GetCurrentStationDisplay())</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="station-management">
+        <h2>Station Management</h2>
+
+        @if (editingIndex >= -1)
+        {
+            <div class="edit-form">
+                <h3>@(editingIndex == -1 ? "Add New Station" : "Edit Station")</h3>
+                <div class="form-group">
+                    <label>Min Tuner Value (%):</label>
+                    <input type="number" step="0.1" @bind="editMin" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Max Tuner Value (%):</label>
+                    <input type="number" step="0.1" @bind="editMax" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Stream URL:</label>
+                    <input type="text" @bind="editUrl" class="form-control" />
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" @onclick="SaveStation">Save</button>
+                    <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <button class="btn btn-success" @onclick="StartAdd">Add New Station</button>
+        }
+
+        <div class="station-list">
+            <table class="stations-table">
+                <thead>
+                    <tr>
+                        <th class="drag-handle-header"></th>
+                        <th>Min %</th>
+                        <th>Max %</th>
+                        <th>Stream URL</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var stations = StationService.GetAllStations();
+                        for (int i = 0; i < stations.Count; i++)
+                        {
+                            var station = stations[i];
+                            var index = i;
+                            <tr draggable="true"
+                                @ondragstart="() => HandleDragStart(index)"
+                                @ondragover:preventDefault
+                                @ondragover="() => HandleDragOver(index)"
+                                @ondrop="() => HandleDrop(index)"
+                                class="@(draggedIndex == index ? "dragging" : "") @(dragOverIndex == index ? "drag-over" : "")">
+                                <td class="drag-handle">⋮⋮</td>
+                                <td>@station.MinTunerValue.ToString("F1")</td>
+                                <td>@station.MaxTunerValue.ToString("F1")</td>
+                                <td class="url-cell">@station.Url</td>
+                                <td>
+                                    <button class="btn btn-sm btn-edit" @onclick="() => StartEdit(index)">Edit</button>
+                                    <button class="btn btn-sm btn-delete" @onclick="() => DeleteStation(index)">Delete</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (MockControlService.IsMockMode)
+    {
+        <div class="mock-controls">
+            <h3>🔧 Mock Hardware Controls</h3>
+            <p class="mock-controls-description">Manual controls for testing (mock mode only)</p>
+
+            <div class="mock-controls-grid">
+                <div class="mock-control-item">
+                    <label class="mock-label">
+                        <input type="checkbox" checked="@mockPowerState" @onchange="HandleMockPowerChange" />
+                        Power Switch
+                    </label>
+                </div>
+
+                <div class="mock-control-item">
+                    <label class="mock-label">Tuner Position: @mockTunerValue.ToString("F1")%</label>
+                    <input type="range" min="0" max="100" step="0.1"
+                           value="@mockTunerValue"
+                           @oninput="HandleMockTunerChange"
+                           class="mock-slider" />
+                </div>
+
+                <div class="mock-control-item">
+                    <label class="mock-label">Volume Level: @mockVolumeValue.ToString("F1")%</label>
+                    <input type="range" min="0" max="100" step="0.1"
+                           value="@mockVolumeValue"
+                           @oninput="HandleMockVolumeChange"
+                           class="mock-slider" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private RadioState? radioState;
+    private Timer? updateTimer;
+
+    private int editingIndex = -2; // -2 = not editing, -1 = adding new, >= 0 = editing existing
+    private double editMin;
+    private double editMax;
+    private string editUrl = string.Empty;
+
+    private int? draggedIndex = null;
+    private int? dragOverIndex = null;
+
+    // Mock hardware control state
+    private bool mockPowerState = true;
+    private double mockTunerValue = 50.0;
+    private double mockVolumeValue = 75.0;
+
+    protected override void OnInitialized()
+    {
+        updateTimer = new Timer(async _ => await UpdateState(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+    }
+
+    private async Task UpdateState()
+    {
+        radioState = RadioStateService.GetCurrentState();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetCurrentStationDisplay()
+    {
+        if (radioState?.CurrentStationUrl == null)
+            return "None";
+
+        if (radioState.CurrentStationUrl.EndsWith(".wav"))
+            return "Static";
+
+        return radioState.CurrentStationUrl;
+    }
+
+    private void StartAdd()
+    {
+        editingIndex = -1;
+        editMin = 0;
+        editMax = 0;
+        editUrl = string.Empty;
+    }
+
+    private void StartEdit(int index)
+    {
+        var stations = StationService.GetAllStations();
+        if (index >= 0 && index < stations.Count)
+        {
+            editingIndex = index;
+            var station = stations[index];
+            editMin = station.MinTunerValue;
+            editMax = station.MaxTunerValue;
+            editUrl = station.Url;
+        }
+    }
+
+    private void SaveStation()
+    {
+        if (editingIndex == -1)
+        {
+            StationService.AddStation(editMin, editMax, editUrl);
+        }
+        else if (editingIndex >= 0)
+        {
+            StationService.UpdateStation(editingIndex, editMin, editMax, editUrl);
+        }
+        CancelEdit();
+    }
+
+    private void DeleteStation(int index)
+    {
+        StationService.DeleteStation(index);
+    }
+
+    private void CancelEdit()
+    {
+        editingIndex = -2;
+        editMin = 0;
+        editMax = 0;
+        editUrl = string.Empty;
+    }
+
+    private void HandleDragStart(int index)
+    {
+        draggedIndex = index;
+    }
+
+    private void HandleDragOver(int index)
+    {
+        dragOverIndex = index;
+    }
+
+    private void HandleDrop(int index)
+    {
+        if (draggedIndex.HasValue && draggedIndex.Value != index)
+        {
+            StationService.MoveStation(draggedIndex.Value, index);
+        }
+        draggedIndex = null;
+        dragOverIndex = null;
+    }
+
+    private void HandleMockPowerChange(ChangeEventArgs e)
+    {
+        mockPowerState = (bool)(e.Value ?? false);
+        MockControlService.SetPower(mockPowerState);
+    }
+
+    private void HandleMockTunerChange(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double value))
+        {
+            mockTunerValue = value;
+            MockControlService.SetTuner(mockTunerValue);
+        }
+    }
+
+    private void HandleMockVolumeChange(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value?.ToString(), out double value))
+        {
+            mockVolumeValue = value;
+            MockControlService.SetVolume(mockVolumeValue);
+        }
+    }
+
+    public void Dispose()
+    {
+        updateTimer?.Dispose();
+    }
+}
