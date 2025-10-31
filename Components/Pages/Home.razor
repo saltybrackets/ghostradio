@@ -4,7 +4,6 @@
 @inject RadioStateService RadioStateService
 @inject StationManagementService StationService
 @inject MockHardwareControlService MockControlService
-@implements IDisposable
 
 <PageTitle>GhostRadio</PageTitle>
 
@@ -20,6 +19,9 @@
 
     <div class="radio-status">
         <h2>Radio Status</h2>
+        <div class="form-actions" style="margin-bottom: 15px;">
+            <button class="btn btn-primary" @onclick="RefreshState">Refresh</button>
+        </div>
         <div class="status-grid">
             <div class="status-item">
                 <span class="status-label">Power:</span>
@@ -44,6 +46,9 @@
 
     <div class="station-management">
         <h2>Station Management</h2>
+        <div class="form-actions" style="margin-bottom: 15px;">
+            <button class="btn btn-primary" @onclick="ReloadStationData">Reload Station Data</button>
+        </div>
 
         @if (editingIndex >= -1)
         {
@@ -148,7 +153,6 @@
 
 @code {
     private RadioState? radioState;
-    private Timer? updateTimer;
 
     private int editingIndex = -2; // -2 = not editing, -1 = adding new, >= 0 = editing existing
     private double editMin;
@@ -165,13 +169,18 @@
 
     protected override void OnInitialized()
     {
-        updateTimer = new Timer(async _ => await UpdateState(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+        // Load state once on page load
+        radioState = RadioStateService.GetCurrentState();
     }
 
-    private async Task UpdateState()
+    private void RefreshState()
     {
         radioState = RadioStateService.GetCurrentState();
-        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ReloadStationData()
+    {
+        StationService.ReloadStations();
     }
 
     private string GetCurrentStationDisplay()
@@ -276,8 +285,4 @@
         }
     }
 
-    public void Dispose()
-    {
-        updateTimer?.Dispose();
-    }
 }
