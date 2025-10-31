@@ -18,6 +18,30 @@ public class StationManagementService
         return _radioStationMap.GetAllStations();
     }
 
+    public void ReloadStations()
+    {
+        try
+        {
+            // Load new data from disk
+            var newMap = RadioStationMap.Load(_stationFilePath);
+
+            // Update the existing singleton instance in-place
+            // This ensures GhostRadioController sees the updated data
+            _radioStationMap.Stations.Clear();
+            foreach (var station in newMap.Stations)
+            {
+                _radioStationMap.Stations.Add(station);
+            }
+
+            Console.WriteLine($"Station data reloaded from disk. {_radioStationMap.Stations.Count} stations loaded.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error reloading stations: {ex.Message}");
+            throw;
+        }
+    }
+
     public void AddStation(double minTunerValue, double maxTunerValue, string url)
     {
         var newStation = new RadioStation
