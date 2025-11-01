@@ -20,3 +20,6 @@ obj/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Misc
+stations.json
