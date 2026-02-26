@@ -18,6 +18,17 @@ public class AudioPlayer : IAudioPlayer
     /// Which station is currently playing.
     /// </summary>
     public string? CurrentAudioSource => _currentAudioSourceSource;
+
+    /// <summary>
+    /// Track title from stream metadata.
+    /// </summary>
+    public string? CurrentTrackTitle => _mediaPlayer.Media?.Meta(MetadataType.NowPlaying)
+        ?? _mediaPlayer.Media?.Meta(MetadataType.Title);
+
+    /// <summary>
+    /// Artist from stream metadata.
+    /// </summary>
+    public string? CurrentTrackArtist => _mediaPlayer.Media?.Meta(MetadataType.Artist);
     
     public AudioPlayer()
     {

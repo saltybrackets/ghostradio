@@ -10,8 +10,15 @@ public class GhostRadioController(
 {
     private bool _powerState = false;
     private string? _currentStationUrl = null;
+    private double _lastTunerValue = 0;
+    private double _lastVolumeValue = 0;
 
     public string? CurrentStationUrl => _currentStationUrl;
+    public bool PowerState => _powerState;
+    public double TunerPosition => _lastTunerValue;
+    public double VolumeLevel => _lastVolumeValue;
+    public string? CurrentTrackTitle => audioPlayer.CurrentTrackTitle;
+    public string? CurrentTrackArtist => audioPlayer.CurrentTrackArtist;
 
     public async Task RunAsync(CancellationToken cancellationToken)
     {
@@ -23,6 +30,10 @@ public class GhostRadioController(
                 bool powerSwitch = hardware.ReadPowerSwitch();
                 double tunerValue = hardware.ReadTunerPercentage();
                 double volumeValue = hardware.ReadVolumePercentage();
+
+                // Cache values for web UI
+                _lastTunerValue = tunerValue;
+                _lastVolumeValue = volumeValue;
 
                 // Handle power state changes
                 if (powerSwitch != _powerState)
