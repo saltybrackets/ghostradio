@@ -40,6 +40,26 @@
                 <span class="status-value">@(GetCurrentStationDisplay())</span>
             </div>
         </div>
+
+        @if (IsNonStaticStation() && (radioState?.TrackTitle != null || radioState?.TrackArtist != null))
+        {
+            <div class="now-playing">
+                <h3>Now Playing:</h3>
+                <div class="track-info">
+                    <div class="track-title">@(radioState?.TrackTitle ?? "Unknown")</div>
+                    @if (!string.IsNullOrEmpty(radioState?.TrackArtist))
+                    {
+                        <div class="track-artist">@radioState.TrackArtist</div>
+                    }
+                </div>
+            </div>
+        }
+        else if (IsNonStaticStation())
+        {
+            <div class="now-playing">
+                <p class="no-info">No track info available.</p>
+            </div>
+        }
     </div>
 
     <div class="station-management">
@@ -183,6 +203,12 @@
             return "Static";
 
         return radioState.CurrentStationUrl;
+    }
+
+    private bool IsNonStaticStation()
+    {
+        return radioState?.CurrentStationUrl != null
+            && !radioState.CurrentStationUrl.EndsWith(".wav");
     }
 
     private void StartAdd()

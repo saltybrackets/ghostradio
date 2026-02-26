@@ -9,6 +9,8 @@ public class MockAudioPlayer : IAudioPlayer
 
     public bool IsPlaying => _isPlaying;
     public string? CurrentAudioSource => _currentAudioSource;
+    public string? CurrentTrackTitle => null;
+    public string? CurrentTrackArtist => null;
 
     public MockAudioPlayer()
     {
