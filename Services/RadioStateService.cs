@@ -3,12 +3,10 @@ namespace GhostRadio.Services;
 public class RadioStateService
 {
     private readonly GhostRadioController _ghostRadio;
-    private readonly IHardwareInterface _hardware;
 
     public RadioStateService(GhostRadioController ghostRadio)
     {
         _ghostRadio = ghostRadio;
-        _hardware = hardware;
     }
 
     public RadioState GetCurrentState()
