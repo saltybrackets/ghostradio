@@ -81,6 +81,10 @@
                     <label>Stream URL:</label>
                     <input type="text" @bind="editUrl" class="form-control" />
                 </div>
+                <div class="form-group">
+                    <label>Station Title:</label>
+                    <input type="text" @bind="editTitle" class="form-control" />
+                </div>
                 <div class="form-actions">
                     <button class="btn btn-primary" @onclick="SaveStation">Save</button>
                     <button class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
@@ -99,6 +103,7 @@
                         <th class="drag-handle-header"></th>
                         <th>Min %</th>
                         <th>Max %</th>
+                        <th>Title</th>
                         <th>Stream URL</th>
                         <th>Actions</th>
                     </tr>
@@ -119,6 +124,7 @@
                                 <td class="drag-handle">⋮⋮</td>
                                 <td>@station.MinTunerValue.ToString("F1")</td>
                                 <td>@station.MaxTunerValue.ToString("F1")</td>
+                                <td>@(station.Title ?? "-")</td>
                                 <td class="url-cell">@station.Url</td>
                                 <td>
                                     <button class="btn btn-sm btn-edit" @onclick="() => StartEdit(index)">Edit</button>
@@ -174,6 +180,7 @@
     private double editMin;
     private double editMax;
     private string editUrl = string.Empty;
+    private string editTitle = string.Empty;
 
     private int? draggedIndex = null;
     private int? dragOverIndex = null;
@@ -202,7 +209,7 @@
         if (radioState.CurrentStationUrl.EndsWith(".wav"))
             return "Static";
 
-        return radioState.CurrentStationUrl;
+        return radioState.CurrentStationTitle ?? radioState.CurrentStationUrl;
     }
 
     private bool IsNonStaticStation()
@@ -217,6 +224,7 @@
         editMin = 0;
         editMax = 0;
         editUrl = string.Empty;
+        editTitle = string.Empty;
     }
 
     private void StartEdit(int index)
@@ -229,18 +237,20 @@
             editMin = station.MinTunerValue;
             editMax = station.MaxTunerValue;
             editUrl = station.Url;
+            editTitle = station.Title ?? string.Empty;
         }
     }
 
     private void SaveStation()
     {
+        var title = string.IsNullOrWhiteSpace(editTitle) ? null : editTitle;
         if (editingIndex == -1)
         {
-            StationService.AddStation(editMin, editMax, editUrl);
+            StationService.AddStation(editMin, editMax, editUrl, title);
         }
         else if (editingIndex >= 0)
         {
-            StationService.UpdateStation(editingIndex, editMin, editMax, editUrl);
+            StationService.UpdateStation(editingIndex, editMin, editMax, editUrl, title);
         }
         CancelEdit();
     }
@@ -256,6 +266,7 @@
         editMin = 0;
         editMax = 0;
         editUrl = string.Empty;
+        editTitle = string.Empty;
     }
 
     private void HandleDragStart(int index)

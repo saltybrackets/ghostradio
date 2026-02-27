@@ -20,7 +20,6 @@ public class MockAudioPlayer : IAudioPlayer
     public void SetVolume(double volumePercentage)
     {
         _volume = Math.Clamp(volumePercentage, 0, 100);
-        Console.WriteLine($"Mock: Volume set to {_volume:F1}%");
     }
 
     public void PlayStreamingAudio(string audioUrl)

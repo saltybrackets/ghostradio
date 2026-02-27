@@ -18,26 +18,28 @@ public class StationManagementService
         return _radioStationMap.GetAllStations();
     }
 
-    public void AddStation(double minTunerValue, double maxTunerValue, string url)
+    public void AddStation(double minTunerValue, double maxTunerValue, string url, string? title = null)
     {
         var newStation = new RadioStation
         {
             MinTunerValue = minTunerValue,
             MaxTunerValue = maxTunerValue,
-            Url = url
+            Url = url,
+            Title = title
         };
 
         _radioStationMap.Stations.Add(newStation);
         SaveStations();
     }
 
-    public void UpdateStation(int index, double minTunerValue, double maxTunerValue, string url)
+    public void UpdateStation(int index, double minTunerValue, double maxTunerValue, string url, string? title = null)
     {
         if (index >= 0 && index < _radioStationMap.Stations.Count)
         {
             _radioStationMap.Stations[index].MinTunerValue = minTunerValue;
             _radioStationMap.Stations[index].MaxTunerValue = maxTunerValue;
             _radioStationMap.Stations[index].Url = url;
+            _radioStationMap.Stations[index].Title = title;
             SaveStations();
         }
     }
@@ -68,10 +70,6 @@ public class StationManagementService
     {
         try
         {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
             string json = JsonSerializer.Serialize(_radioStationMap, GhostRadioJsonContext.Default.RadioStationMap);
             File.WriteAllText(_stationFilePath, json);
         }
