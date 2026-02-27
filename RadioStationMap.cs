@@ -38,7 +38,17 @@ public class RadioStationMap
     }
     
     public IReadOnlyList<RadioStation> GetAllStations() => Stations.AsReadOnly();
-    
+
+    /// <summary>
+    /// Return the RadioStation object mapped to a given URL.
+    /// </summary>
+    /// <param name="url">URL of the station to retrieve.</param>
+    /// <returns>RadioStation with the matching URL, or null if not found.</returns>
+    public RadioStation? GetStationByUrl(string url)
+    {
+        return Stations.FirstOrDefault(s => s.Url == url);
+    }
+
     /// <summary>
     /// Deserialize a RadioStationMap from a JSON file.
     /// </summary>
